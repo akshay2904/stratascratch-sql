@@ -33,11 +33,11 @@ WITH claim_counts AS (
     SELECT 
         p.gender,
         p.age,
-        COUNT(c.claim_id) OVER (PARTITION BY c.patient_id) AS claim_count
-    FROM patients p
-    JOIN claims c 
-        ON p.patient_id = c.patient_id
-    WHERE EXTRACT(YEAR FROM c.claim_date) = 2021
+        COUNT(c.claim_id) OVER (PARTITION BY c.account_id) AS claim_count
+    FROM cvs_accounts p
+    JOIN cvs_claims c 
+        ON p.account_id = c.account_id
+    WHERE EXTRACT(YEAR FROM c.date_submitted) = 2021
 ),
 filtered AS (
     SELECT gender, age
@@ -58,12 +58,12 @@ GROUP BY gender;
 SELECT 
     p.gender,
     ROUND(AVG(p.age)) AS average_age
-FROM patients p
-WHERE p.patient_id IN (
-    SELECT patient_id
-    FROM claims
-    WHERE EXTRACT(YEAR FROM claim_date) = 2021
-    GROUP BY patient_id
+FROM cvs_accounts p
+WHERE p.account_id IN (
+    SELECT account_id
+    FROM cvs_claims
+    WHERE EXTRACT(YEAR FROM date_submitted) = 2021
+    GROUP BY account_id
     HAVING COUNT(claim_id) > 1
 )
 GROUP BY p.gender;
